@@ -1,0 +1,59 @@
+IndusFlow : la plateforme expliquée
+
+IndusFlow est une plateforme web destinée à une entreprise de maintenance industrielle, 
+c’est-à-dire une société qui entretient et répare les machines de ses clients : usines, 
+ateliers, sites de production. Aujourd’hui, ce type d’entreprise travaille souvent avec 
+des outils dispersés : demandes de dépannage par téléphone, rapports papier ou Excel, 
+notices rangées dans des dossiers partagés, factures préparées à la main en fin de mois.
+Résultat : des oublis de facturation, des erreurs de calcul et des documents perdus. 
+IndusFlow centralise tout ce travail, de la panne jusqu’à la facture.
+
+Les utilisateurs
+
+Quatre profils utilisent la plateforme. L’administrateur paramètre l’entreprise (tarifs, 
+TVA, mentions légales). Le responsable maintenance reçoit les demandes, planifie les 
+interventions, valide les rapports et lance la facturation. Le technicien voit ses 
+interventions du jour et saisit ses rapports. Le client déclare ses pannes et consulte
+ ses machines, ses documents et ses factures. Chaque client ne voit que ses propres données.
+
+Les clients et les équipements
+
+La plateforme enregistre les clients, leurs sites (une usine à Lyon, une autre à Grenoble) 
+et leur contrat, qui fixe le taux horaire, les frais de déplacement et le délai de paiement. 
+Chaque machine a une fiche (marque, modèle, numéro de série), un niveau de criticité et 
+un état (en service, en panne, en maintenance). Elle garde aussi un historique complet de 
+tout ce qui lui est arrivé, utile pour le technicien avant d’intervenir et comme preuve 
+en cas de litige.
+
+Les interventions
+
+C’est le cœur du métier. Une intervention peut être corrective (réparer une panne), préventive
+(entretien planifié) ou réglementaire (contrôle obligatoire qui produit un certificat). Elle suit un cycle précis : demandée, planifiée, en cours, terminée, validée, puis facturée. Le technicien remplit son rapport avec le temps passé, les pièces utilisées, des photos et la signature du client. Le responsable valide le rapport ou le renvoie s’il est incomplet. Une fois validée, l’intervention devient facturable.
+
+La documentation technique
+
+Tous les documents sont stockés au même endroit : notices constructeur, plans, rapports d’intervention, certificats de conformité, factures. Les rapports et certificats sont générés automatiquement en PDF. Chaque document est versionné : une notice mise à jour ne remplace jamais l’ancienne, l’historique est conservé. Les documents validés ne peuvent plus être modifiés, car ce sont des preuves. La plateforme alerte aussi le responsable avant l’expiration d’un certificat.
+
+La facturation
+
+C’est le point fort du projet. Le premier jour de chaque mois, la plateforme regroupe automatiquement les interventions validées de chaque client et prépare une facture en brouillon. Le responsable la relit puis l’émet : elle reçoit alors un numéro définitif et est générée au format Factur-X, un PDF qui contient aussi des données XML lisibles par un logiciel comptable. La France rend progressivement la facture électronique obligatoire entre 2026 et 2027, ce qui rend ce sujet très actuel.
+
+Les règles légales sont respectées : numérotation continue sans trou, facture non modifiable une fois émise (on corrige par un avoir), mentions obligatoires et conservation pendant 10 ans. Une intervention ne peut jamais être facturée deux fois.
+
+Les notifications
+
+Chaque événement important déclenche un email automatique : nouvelle panne pour le responsable, intervention assignée pour le technicien, rapport et facture pour le client, relance en cas de retard de paiement.
+
+La partie technique
+
+La plateforme repose sur une architecture microservices en NestJS. Une API Gateway sert de point d’entrée unique : elle vérifie le JWT, contrôle les rôles et limite le nombre de requêtes. Derrière, six services ont chacun leur rôle et leur propre base PostgreSQL : Auth, Asset (clients et machines), Intervention, Document, Billing et Notification.
+
+Les services ne s’appellent pas directement : ils communiquent par événements via RabbitMQ. Par exemple, quand une intervention est validée, le service Intervention publie un événement ; le service Document génère alors le rapport PDF, le service Billing ajoute la ligne à facturer et le service Notification prévient le client. Redis sert de cache pour les tableaux de bord, et les fichiers sont stockés sur S3 (MinIO en local).
+
+Plusieurs points techniques montrent la maîtrise du sujet : la numérotation des factures est protégée par un verrou en base dans une transaction, pour éviter deux factures avec le même numéro ; les montants sont stockés en centimes pour éviter les erreurs d’arrondi ; le pattern outbox garantit qu’aucun événement n’est perdu ; chaque PDF de facture est accompagné de son empreinte SHA-256 pour prouver qu’il n’a pas été modifié.
+
+Le déploiement
+
+Tout se lance en local avec Docker Compose. En production, l’application tourne sur un VPS avec un nom de domaine et HTTPS. À chaque push sur GitHub, GitHub Actions lance les tests, construit les images Docker et déploie automatiquement. La documentation de l’API est accessible en ligne via Swagger.
+
+En résumé, IndusFlow montre que tu sais concevoir une application métier complète, respecter des règles légales réelles, construire une architecture microservices fiable et la déployer en production.
