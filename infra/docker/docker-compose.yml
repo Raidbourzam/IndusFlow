@@ -55,4 +55,4 @@ services:
 
 volumes:
   postgres_data:
-  minio_data:
+  seaweed_data:
