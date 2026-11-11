@@ -67,6 +67,164 @@ services:
     ports:
       - "8080:8080"
 
+  auth-service:
+    build:
+      context: ../../services/auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: postgres
+      DB_NAME: auth_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../../services/auth-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  asset-service:
+    build:
+      context: ../../services/asset-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_NAME: asset_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ../../services/asset-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  intervention-service:
+    build:
+      context: ../../services/intervention-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      DB_HOST: postgres
+      DB_NAME: intervention_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    volumes:
+      - ../../services/intervention-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  document-service:
+    build:
+      context: ../../services/document-service
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: 3004
+      DB_HOST: postgres
+      DB_NAME: document_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_BUCKET: ${S3_BUCKET}
+    volumes:
+      - ../../services/document-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_started
+
+  billing-service:
+    build:
+      context: ../../services/billing-service
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      DB_HOST: postgres
+      DB_NAME: billing_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    volumes:
+      - ../../services/billing-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ../../services/notification-service
+    ports:
+      - "3006:3006"
+    environment:
+      PORT: 3006
+      DB_HOST: postgres
+      DB_NAME: notification_db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+    volumes:
+      - ../../services/notification-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: ../../services/api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      ASSET_SERVICE_URL: http://asset-service:3002
+      INTERVENTION_SERVICE_URL: http://intervention-service:3003
+      DOCUMENT_SERVICE_URL: http://document-service:3004
+      BILLING_SERVICE_URL: http://billing-service:3005
+    volumes:
+      - ../../services/api-gateway:/app
+      - /app/node_modules
+    depends_on:
+      - auth-service
+      - asset-service
+      - intervention-service
+      - document-service
+      - billing-service
+      - notification-service
+
 volumes:
   postgres_data:
   seaweed_data:

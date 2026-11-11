@@ -1,0 +1,26 @@
+# PostgreSQL
+POSTGRES_USER=indusflow
+POSTGRES_PASSWORD=indusflow_dev
+POSTGRES_PORT=5432
+
+# RabbitMQ
+RABBITMQ_USER=indusflow
+RABBITMQ_PASSWORD=indusflow_dev
+RABBITMQ_URL=amqp://indusflow:indusflow_dev@localhost:5672
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Stockage de fichiers compatible S3 (SeaweedFS en local, AWS S3 en production)
+S3_ENDPOINT=http://localhost:8333
+S3_ACCESS_KEY=indusflow
+S3_SECRET_KEY=indusflow_dev
+S3_BUCKET=indusflow-documents
+
+# Emails (Mailpit en local)
+SMTP_HOST=localhost
+SMTP_PORT=1025
+
+# JWT
+JWT_SECRET=a9fe320e931906446c882c5a53ed74566e2a516a828a62a08dee59cd4005cfea
+JWT_EXPIRES_IN=1h

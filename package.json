@@ -2,10 +2,7 @@
   "name": "indusflow",
   "private": true,
   "description": "Plateforme de maintenance industrielle avec facturation électronique",
-  "workspaces": [
-    "services/*",
-    "libs/*"
-  ],
+  "workspaces": [],
   "scripts": {
     "infra:up": "docker compose --env-file .env -f infra/docker/docker-compose.yml up -d",
     "infra:down": "docker compose --env-file .env -f infra/docker/docker-compose.yml down",

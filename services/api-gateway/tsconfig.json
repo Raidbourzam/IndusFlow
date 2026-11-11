@@ -19,5 +19,9 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false
+  },
+  "watchOptions": {
+    "watchFile": "dynamicPriorityPolling",
+    "watchDirectory": "dynamicPriorityPolling"
   }
 }
